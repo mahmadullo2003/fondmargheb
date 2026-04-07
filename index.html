@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tg">
 <head>
     <meta charset="UTF-8">
@@ -15,14 +15,14 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Inter', sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
-            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
         }
 
         header {
@@ -32,11 +32,8 @@
             background: linear-gradient(180deg, rgba(56,189,248,0.1) 0%, rgba(15,23,42,1) 100%);
         }
 
-        h1 { margin: 0; font-size: 24px; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); }
-        .subtitle { opacity: 0.6; font-size: 14px; margin-top: 8px; }
-
         .dashboard {
-            width: 90%;
+            width: 95%;
             max-width: 500px;
             margin-top: -30px;
         }
@@ -50,52 +47,41 @@
             border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .total-label { font-size: 14px; text-transform: uppercase; opacity: 0.7; letter-spacing: 2px; }
-        .total-amount { font-size: 48px; font-weight: 800; margin: 10px 0; color: var(--success); text-shadow: 0 0 20px rgba(34,197,94,0.3); }
+        .total-amount { font-size: 42px; font-weight: 800; color: var(--success); margin: 10px 0; }
 
         .list-container {
             width: 100%;
-            margin-top: 30px;
+            margin-top: 20px;
             background: var(--card);
             border-radius: 20px;
-            overflow: hidden;
             border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 30px;
         }
 
         .list-item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             padding: 15px 20px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
-            transition: background 0.3s;
         }
 
-        .list-item:hover { background: rgba(255,255,255,0.02); }
-
-        .user-info { display: flex; flex-direction: column; }
-        .user-name { font-weight: 600; font-size: 15px; }
-        .user-meta { font-size: 12px; opacity: 0.5; margin-top: 4px; }
-
+        .user-name { font-weight: 600; display: block; }
+        .user-meta { font-size: 11px; opacity: 0.5; }
         .user-amount { font-weight: bold; color: var(--accent); }
 
         footer {
-            margin: 40px 0;
+            margin-top: auto;
+            padding: 30px;
             text-align: center;
-            padding: 20px;
             border-top: 1px solid rgba(255,255,255,0.1);
-            width: 80%;
+            width: 100%;
         }
-
-        .author-name { display: block; font-size: 18px; font-weight: 700; color: var(--accent); margin-top: 5px; }
 
         #loader { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: var(--bg); display: flex; justify-content: center; 
-            align-items: center; z-index: 100; font-weight: bold;
+            position: fixed; inset: 0; background: var(--bg); 
+            display: flex; justify-content: center; align-items: center; z-index: 100; 
         }
 
-        /* Анимация барои боркунӣ */
         .spinner {
             width: 40px; height: 40px; border: 4px solid rgba(56,189,248,0.1);
             border-left-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite;
@@ -108,34 +94,34 @@
 <div id="loader"><div class="spinner"></div></div>
 
 <header>
-    <h1>Фонди Деҳаи Марғеб</h1>
-    <div class="subtitle" id="currentMonth">Ҳисоботи моҳи апрел 2026</div>
+    <h1 style="color: var(--accent); font-size: 20px; margin: 0;">ФОНДИ ДЕҲАИ МАРҒЕБ</h1>
+    <div style="opacity: 0.6; font-size: 12px; margin-top: 5px;">Ҳисоботи зинда аз Excel</div>
 </header>
 
 <div class="dashboard">
     <div class="main-card">
-        <div class="total-label">Маблағи умумӣ</div>
-        <div class="total-amount" id="grandTotal">0.00</div>
-        <div style="font-size: 14px; opacity: 0.5;">Сомонӣ</div>
+        <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Маблағи умумӣ</div>
+        <div class="total-amount" id="grandTotal">0</div>
+        <div style="font-size: 14px; opacity: 0.5;">СОМОНӢ</div>
     </div>
 
-    <div class="list-container" id="dataRows">
-        </div>
+    <div class="list-container" id="dataRows"></div>
 </div>
 
 <footer>
-    <span style="opacity: 0.6; font-size: 12px; text-transform: uppercase;">Ҳисобот диҳанда</span>
-    <span class="author-name">Нарзиев Маҳмадулло</span>
+    <div style="opacity: 0.5; font-size: 11px; text-transform: uppercase;">Ҳисобот диҳанда</div>
+    <div style="font-size: 18px; font-weight: 700; color: var(--accent); margin-top: 5px;">Нарзиев Маҳмадулло</div>
 </footer>
 
 <script>
-    // МУҲИМ: Ин линкро бо линки репозиторияи худ иваз кунед
-    const GITHUB_RAW_URL = 'https://github.com/mahmadullo2003/fondmargheb/raw/refs/heads/main/data.xlsx';
+    // Истифодаи AllOrigins барои гузаштан аз маҳдудияти CORS
+    const rawUrl = 'https://github.com/mahmadullo2003/fondmargheb/raw/refs/heads/main/data.xlsx';
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`;
 
-    async function fetchData() {
+    async function loadExcel() {
         try {
-            const response = await fetch(GITHUB_RAW_URL);
-            if (!response.ok) throw new Error("Файл аз Гитҳаб ёфт нашуд");
+            const response = await fetch(proxyUrl);
+            if (!response.ok) throw new Error("Хатогӣ дар боркунӣ");
             
             const arrayBuffer = await response.arrayBuffer();
             const data = new Uint8Array(arrayBuffer);
@@ -146,38 +132,37 @@
             const container = document.getElementById('dataRows');
             let totalSum = 0;
 
-            // Коркарди маълумот (аз сатри 4)
+            // Хондан аз сатри 4 (индекс 3)
             for (let i = 3; i < json.length; i++) {
                 const row = json[i];
-                const name = row[1];
-                const opId = row[34] || "ID: ---";
-                const amount = parseFloat(row[36]) || 0;
+                const name = row[1]; // Сутуни B
+                const amount = parseFloat(row[36]) || 0; // Сутуни AK
+                const opId = row[34] || "---"; // Сутуни AI
 
-                if (name) {
+                if (name && name.trim() !== "") {
                     totalSum += amount;
-                    const item = document.createElement('div');
-                    item.className = 'list-item';
-                    item.innerHTML = `
-                        <div class="user-info">
+                    const div = document.createElement('div');
+                    div.className = 'list-item';
+                    div.innerHTML = `
+                        <div>
                             <span class="user-name">${name}</span>
-                            <span class="user-meta">Транзаксия: ${opId}</span>
+                            <span class="user-meta">Амалиёт: ${opId}</span>
                         </div>
-                        <div class="user-amount">+${amount}</div>
+                        <div class="user-amount">${amount} TJS</div>
                     `;
-                    container.appendChild(item);
+                    container.appendChild(div);
                 }
             }
 
             document.getElementById('grandTotal').innerText = totalSum.toLocaleString();
             document.getElementById('loader').style.display = 'none';
 
-        } catch (error) {
-            console.error(error);
-            document.getElementById('loader').innerHTML = `<div style="color:red; text-align:center; padding:20px;">Хатогӣ дар пайвастшавӣ ба Гитҳаб.<br>Лутфан танзимоти линкро санҷед.</div>`;
+        } catch (err) {
+            document.getElementById('loader').innerHTML = `<div style="color:red; text-align:center;">Хатогӣ: Файл хонда нашуд. <br> Танзимоти GitHub-ро санҷед.</div>`;
         }
     }
 
-    window.onload = fetchData;
+    window.onload = loadExcel;
 </script>
 
 </body>
