@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+<html lang="tg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мониторинги Фонди Марғеб</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #38bdf8;
+            --success: #22c55e;
+            --text: #f8fafc;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            padding: 40px 20px;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(56,189,248,0.1) 0%, rgba(15,23,42,1) 100%);
+        }
+
+        h1 { margin: 0; font-size: 24px; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); }
+        .subtitle { opacity: 0.6; font-size: 14px; margin-top: 8px; }
+
+        .dashboard {
+            width: 90%;
+            max-width: 500px;
+            margin-top: -30px;
+        }
+
+        .main-card {
+            background: var(--card);
+            padding: 30px;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .total-label { font-size: 14px; text-transform: uppercase; opacity: 0.7; letter-spacing: 2px; }
+        .total-amount { font-size: 48px; font-weight: 800; margin: 10px 0; color: var(--success); text-shadow: 0 0 20px rgba(34,197,94,0.3); }
+
+        .list-container {
+            width: 100%;
+            margin-top: 30px;
+            background: var(--card);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.3s;
+        }
+
+        .list-item:hover { background: rgba(255,255,255,0.02); }
+
+        .user-info { display: flex; flex-direction: column; }
+        .user-name { font-weight: 600; font-size: 15px; }
+        .user-meta { font-size: 12px; opacity: 0.5; margin-top: 4px; }
+
+        .user-amount { font-weight: bold; color: var(--accent); }
+
+        footer {
+            margin: 40px 0;
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            width: 80%;
+        }
+
+        .author-name { display: block; font-size: 18px; font-weight: 700; color: var(--accent); margin-top: 5px; }
+
+        #loader { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: var(--bg); display: flex; justify-content: center; 
+            align-items: center; z-index: 100; font-weight: bold;
+        }
+
+        /* Анимация барои боркунӣ */
+        .spinner {
+            width: 40px; height: 40px; border: 4px solid rgba(56,189,248,0.1);
+            border-left-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div id="loader"><div class="spinner"></div></div>
+
+<header>
+    <h1>Фонди Деҳаи Марғеб</h1>
+    <div class="subtitle" id="currentMonth">Ҳисоботи моҳи апрел 2026</div>
+</header>
+
+<div class="dashboard">
+    <div class="main-card">
+        <div class="total-label">Маблағи умумӣ</div>
+        <div class="total-amount" id="grandTotal">0.00</div>
+        <div style="font-size: 14px; opacity: 0.5;">Сомонӣ</div>
+    </div>
+
+    <div class="list-container" id="dataRows">
+        </div>
+</div>
+
+<footer>
+    <span style="opacity: 0.6; font-size: 12px; text-transform: uppercase;">Ҳисобот диҳанда</span>
+    <span class="author-name">Нарзиев Маҳмадулло</span>
+</footer>
+
+<script>
+    // МУҲИМ: Ин линкро бо линки репозиторияи худ иваз кунед
+    const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/USER_NAME/REPO_NAME/main/data.xlsx';
+
+    async function fetchData() {
+        try {
+            const response = await fetch(GITHUB_RAW_URL);
+            if (!response.ok) throw new Error("Файл аз Гитҳаб ёфт нашуд");
+            
+            const arrayBuffer = await response.arrayBuffer();
+            const data = new Uint8Array(arrayBuffer);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
+
+            const container = document.getElementById('dataRows');
+            let totalSum = 0;
+
+            // Коркарди маълумот (аз сатри 4)
+            for (let i = 3; i < json.length; i++) {
+                const row = json[i];
+                const name = row[1];
+                const opId = row[34] || "ID: ---";
+                const amount = parseFloat(row[36]) || 0;
+
+                if (name) {
+                    totalSum += amount;
+                    const item = document.createElement('div');
+                    item.className = 'list-item';
+                    item.innerHTML = `
+                        <div class="user-info">
+                            <span class="user-name">${name}</span>
+                            <span class="user-meta">Транзаксия: ${opId}</span>
+                        </div>
+                        <div class="user-amount">+${amount}</div>
+                    `;
+                    container.appendChild(item);
+                }
+            }
+
+            document.getElementById('grandTotal').innerText = totalSum.toLocaleString();
+            document.getElementById('loader').style.display = 'none';
+
+        } catch (error) {
+            console.error(error);
+            document.getElementById('loader').innerHTML = `<div style="color:red; text-align:center; padding:20px;">Хатогӣ дар пайвастшавӣ ба Гитҳаб.<br>Лутфан танзимоти линкро санҷед.</div>`;
+        }
+    }
+
+    window.onload = fetchData;
+</script>
+
+</body>
+</html>
